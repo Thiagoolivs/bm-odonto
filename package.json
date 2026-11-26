@@ -14,8 +14,7 @@
     "start": "serve dist --single --no-clipboard --listen tcp://0.0.0.0:${PORT:-3000}",
     "typecheck": "tsc -b",
     "assets:extrair": "node scripts/extrair-assets.mjs",
-    "assets:otimizar": "node scripts/otimizar-assets.mjs",
-    "assets:poster": "node scripts/gerar-poster.mjs"
+    "assets:otimizar": "node scripts/otimizar-assets.mjs"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",

@@ -1,76 +1,62 @@
-# BM Odontologia — landing page (rascunho)
+# BM Odontologia — landing page (rascunho v2)
 
-Landing page para apresentar à **BM Odontologia** (lentes em resina, São Paulo).
-Foco: impacto visual no celular nos primeiros 5 segundos — dente 3D procedural com
-uma lente de resina que "respira" e encaixa, partículas douradas e uma história
-guiada pelo scroll até o simulador de cor e formato.
+Experiência imersiva para a **BM Odontologia** (lentes em resina, São Paulo), no espírito de
+apple.com/airpods-pro, landonorris.com e activetheory.net.
 
-**Stack:** React 19 + Vite 8 + TypeScript + Tailwind 4 + React Three Fiber + drei +
-GSAP (ScrollTrigger) + Lenis. A especificação completa está em [`CLAUDE.md`](./CLAUDE.md).
+**Stack:** React 19 · Vite 8 · TypeScript · Tailwind 4 · WebGL (shader próprio) · React Three Fiber + drei ·
+GSAP ScrollTrigger · Lenis. Especificação e decisões de identidade em [`CLAUDE.md`](./CLAUDE.md).
+
+## O que tem
+
+1. **Abertura** — contador 0–100 enquanto o vídeo carrega; depois a cortina sobe.
+2. **Hero em WebGL** — retrato em vídeo que se funde ao estúdio da página (sem bordas), com color grading,
+   grão e uma "lente de resina" que refrata a imagem seguindo o cursor (no celular, flutua sobre o sorriso).
+3. **Sequência estilo AirPods** — quadros do vídeo controlados pela rolagem: um cartão cresce até a tela
+   cheia enquanto ela vira e sorri para a câmera.
+4. **Lentes em resina** — dente + lente 3D em estúdio de porcelana (arraste para girar), simulador de
+   tonalidade (BL1–A2) e formato (oval/quadrado/triangular), processo e técnicas.
+5. **Resultados** (fotos e vídeos reais), **Doutores**, **Depoimentos** (5,0 no Google), **Localização + FAQ**
+   e rodapé com os responsáveis técnicos.
 
 ## Rodar
 
 ```bash
 npm install
-npm run dev            # http://localhost:5173 (use --host para abrir no celular)
-npm run build          # gera dist/
-npm start              # serve dist/ em $PORT (o que o Railway usa)
+npm run dev        # http://localhost:5173
+npm run build      # gera dist/
+npm start          # serve dist/ em $PORT (Railway)
 ```
 
-## Deploy no Railway
+`?3d=1` força o WebGL/3D em aparelhos sem GPU (útil para gravar ou testar em VM).
 
-1. Suba o repositório no GitHub e, no Railway, **New Project → Deploy from GitHub repo**.
-2. Nada a configurar: o `railway.json` já define `npm run build` e `npm start`
-   (servidor estático `serve`, ouvindo em `0.0.0.0:$PORT`, com gzip/brotli e cache).
-3. Em **Settings → Networking → Generate Domain** para ter a URL pública.
+## Deploy (Railway)
 
-Node 22 (definido em `engines` e `.nvmrc`). Também funciona na Vercel sem configuração
-(`npx vercel --prod`), como pede o `CLAUDE.md`.
+O serviço do Railway publica a branch `main`: build `npm run build`, start `npm start` (ver `railway.json`).
+Para a URL pública: **Settings → Networking → Generate Domain**.
+
+## Desempenho
+
+- Um único relógio (ticker do GSAP) para scroll suave, shader, sequência e 3D — sem loops concorrentes.
+- Shader da abertura sem three.js (carrega rápido); cena 3D carregada sob demanda e renderizada só na tela.
+- Sem GPU (WebGL emulado na CPU) a página usa vídeo direto e pôster estático no lugar do 3D.
+- Quadros da sequência carregados progressivamente a partir da primeira rolagem.
+- Lighthouse (build de produção): celular 95 · desktop 99 em desempenho; acessibilidade 100.
 
 ## Antes de publicar oficialmente
 
 - [ ] Confirmar com a clínica o WhatsApp **(11) 97352-4548** (`src/content.ts`).
-- [ ] É um rascunho: `index.html` tem `noindex` e `public/robots.txt` bloqueia buscadores.
-      Remova os dois quando a clínica aprovar.
-- [ ] Revisar os textos em `src/content.ts` (todo o conteúdo está lá).
+- [ ] Remover o `noindex` do `index.html` e liberar `public/robots.txt`.
+- [ ] Idealmente, trocar o vídeo de banco da abertura por um filmado na clínica (mesmo enquadramento).
 
-## Gravar o vídeo (~20 s, retrato)
+## Mídia
 
-Celular em modo não perturbe → ~5 s no hero (o dente gira e a lente encaixa sozinha)
-→ rolar pela história (Avaliação → Planejamento → Aplicação) → no simulador, trocar
-duas cores e um formato.
+- Abertura e sequência: Pexels vídeo 5496767 (licença Pexels, uso comercial gratuito), processado com
+  ffmpeg: loop sem emenda (xfade), recorte 4:5, H.264 sem áudio; quadros WebP extraídos do trecho 6,2–10,8 s.
+- Fonte: Switzer (Fontshare, ITF Free Font License).
+- Fotos e vídeos de casos: site atual da clínica (`npm run assets:extrair` + `npm run assets:otimizar`).
 
-## Como o 3D funciona
+## Código de Ética Odontológica
 
-- `src/three/geometry.ts` — incisivo central modelado proceduralmente (anéis de
-  superelipse da borda incisal ao ápice). A lente é uma casca fina gerada da face
-  vestibular da própria coroa, por isso encaixa com precisão. Oval/Quadrado/Triangular
-  são *morph targets* da mesma malha.
-- `src/three/Scene.tsx` — materiais (lente em `MeshPhysicalMaterial` com transmission
-  0.9, clearcoat 1, ior 1.5, iridescência leve), luz de estúdio + rim light dourado,
-  Environment "studio" (HDR do preset do drei servido localmente, reduzido para 512 px)
-  e a coreografia: hero → história → simulador lendo a posição dos "slots" no DOM.
-- Um único canvas fixo atrás das três primeiras seções; ele é carregado sob demanda,
-  pausa quando sai da tela e usa DPR máx. 1.5 no celular.
-- **Fallback:** sem WebGL — ou com WebGL emulado por software (SwiftShader/llvmpipe),
-  que travaria a rolagem — mostramos um pôster estático da própria cena
-  (`public/assets/dente-3d.webp`). Para forçar o 3D em qualquer aparelho: `?3d=1`.
-- `prefers-reduced-motion`: sem rotação automática, sem scroll suave e sem animações
-  de entrada; a lente fica parada à frente do dente.
-
-## Assets
-
-As fotos e vídeos reais vêm do site atual da clínica:
-
-```bash
-npm run assets:extrair    # baixa para public/assets
-npm run assets:otimizar   # WebP q80 (máx. 1600/1200 px), logo 512 px, vídeos leves + pôsteres, HDR 512 px
-npm run assets:poster     # (com o dev server rodando) regenera o pôster do fallback — requer Playwright
-```
-
-## Regras do Código de Ética Odontológica
-
-Sem preços, descontos, parcelamento ou formas de pagamento; sem a expressão de
-comparação proibida; sem promessa de resultado; responsáveis técnicos e CROs visíveis
-no rodapé. O simulador traz a legenda "Simulação ilustrativa. A indicação final é feita
-na avaliação." e os resultados, "Imagens publicadas com autorização dos pacientes".
+Sem preços, descontos, parcelamento ou formas de pagamento; sem a expressão de comparação proibida;
+sem promessa de resultado; CROs visíveis; imagens de banco marcadas como ilustrativas; casos clínicos com
+a nota de autorização dos pacientes.

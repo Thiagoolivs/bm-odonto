@@ -1,50 +1,46 @@
 import { useEffect, useLayoutEffect } from "react";
-import { Stage } from "./components/Stage";
+import { Loader } from "./components/Loader";
 import { Header } from "./components/Header";
+import { Cursor } from "./components/Cursor";
 import { Hero } from "./components/Hero";
-import { ScrollStory } from "./components/ScrollStory";
-import { Simulator } from "./components/Simulator";
-import { SorrisoReal } from "./components/SorrisoReal";
-import { Tecnicas } from "./components/Tecnicas";
+import { SmileSequence } from "./components/SmileSequence";
+import { Lentes } from "./components/Lentes";
 import { Resultados } from "./components/Resultados";
 import { Doutores } from "./components/Doutores";
 import { Depoimentos } from "./components/Depoimentos";
-import { Jornada, OutrosTratamentos } from "./components/Jornada";
-import { Faq } from "./components/Faq";
-import { PreAvaliacao } from "./components/PreAvaliacao";
-import { Localizacao } from "./components/Localizacao";
+import { Visite } from "./components/Visite";
 import { Footer } from "./components/Footer";
 import { WhatsAppFab } from "./components/WhatsAppFab";
-import { gsap, initScroll, ScrollTrigger, scrollToHash } from "./lib/scroll";
+import { gsap, initScroll, ScrollTrigger } from "./lib/scroll";
 import { prefersReducedMotion } from "./lib/env";
+import { whenEntered } from "./lib/app";
 
 export default function App() {
-  // rolagem suave + animações de entrada ao rolar
   useLayoutEffect(() => {
+    document.documentElement.classList.add("is-loading");
     const reduced = prefersReducedMotion();
     const stop = initScroll(reduced);
     if (reduced) return stop;
-
     document.documentElement.classList.add("reveal-ready");
-    const ctx = gsap.context(() => {
-      ScrollTrigger.batch("[data-reveal]", {
-        start: "top 90%",
-        once: true,
-        onEnter: (els) =>
-          gsap.to(els, { opacity: 1, y: 0, duration: 1.1, ease: "power3.out", stagger: 0.09, overwrite: true }),
-      });
-      gsap.utils.toArray<HTMLElement>("[data-lines]").forEach((el) => {
-        if (el.closest("#inicio")) return;
-        gsap.from(el.querySelectorAll("[data-line]"), {
-          yPercent: 112,
-          duration: 1.3,
-          ease: "expo.out",
-          stagger: 0.1,
-          scrollTrigger: { trigger: el, start: "top 90%", once: true },
+    const ctx = gsap.context(() => {});
+    const unsub = whenEntered(() => ctx.add(() => {
+        ScrollTrigger.batch("[data-reveal]", {
+          start: "top 88%",
+          once: true,
+          onEnter: (els) => gsap.to(els, { opacity: 1, y: 0, duration: 1.3, ease: "expo.out", stagger: 0.08, overwrite: true }),
         });
-      });
-    });
+        gsap.utils.toArray<HTMLElement>("[data-lines]").forEach((el) => {
+          gsap.from(el.querySelectorAll("[data-line]"), {
+            yPercent: 110,
+            duration: 1.4,
+            ease: "expo.out",
+            stagger: 0.08,
+            scrollTrigger: { trigger: el, start: "top 88%", once: true },
+          });
+        });
+      }));
     return () => {
+      unsub();
       ctx.revert();
       document.documentElement.classList.remove("reveal-ready");
       stop();
@@ -53,35 +49,23 @@ export default function App() {
 
   useEffect(() => {
     const refresh = () => ScrollTrigger.refresh();
-    document.fonts?.ready.then(refresh);
     window.addEventListener("load", refresh);
-    if (location.hash) setTimeout(() => scrollToHash(location.hash), 400);
     return () => window.removeEventListener("load", refresh);
   }, []);
 
   return (
     <>
-      <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:bg-cream focus:p-3 focus:text-ink">
-        Pular para o conteúdo
-      </a>
-      <Stage />
+      <Loader />
+      <Cursor />
       <Header />
       <main id="conteudo">
-        <div id="zona-3d" className="relative z-10">
-          <Hero />
-          <ScrollStory />
-          <Simulator />
-        </div>
-        <SorrisoReal />
-        <Tecnicas />
+        <Hero />
+        <SmileSequence />
+        <Lentes />
         <Resultados />
         <Doutores />
         <Depoimentos />
-        <Jornada />
-        <OutrosTratamentos />
-        <Faq />
-        <PreAvaliacao />
-        <Localizacao />
+        <Visite />
       </main>
       <Footer />
       <WhatsAppFab />
