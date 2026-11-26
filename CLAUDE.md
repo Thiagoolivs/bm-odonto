@@ -22,12 +22,15 @@ Se a extensão vier diferente (jpg/png), ajuste os caminhos no código conforme 
 
 React + Vite + TypeScript + Tailwind + React Three Fiber + @react-three/drei + GSAP (ScrollTrigger) + Lenis (scroll suave). Página única, mobile-first: valide em 390x844 retrato antes de tudo.
 
-## Identidade (manter exatamente, igual ao site atual)
+## Identidade (versão 2, aprovada pelo dono do projeto em 26/11/2026)
 
-- Cores: `#25190f` (fundo escuro principal), `#b98c4b` (dourado: detalhes, linhas de 1px, ícones), `#f7eadb` (creme: fundos claros e texto sobre escuro), `#2d241c` (texto)
-- Fontes (Google Fonts): títulos em "Cormorant Garamond" 300–500, bem grandes; corpo e rótulos em "Montserrat" 300–500, rótulos em caixa-alta com letter-spacing
-- Assinatura: "Naturalidade e sofisticação em forma de sorriso."
-- Clima: luxo silencioso. Muito respiro, grão sutil no fundo escuro, brilhos dourados discretos. Nada de azul clínico nem ícone genérico de dente.
+A primeira versão (marrom/dourado/creme + Cormorant) foi considerada "cafona" e descartada. Direção atual: editorial, premium, no espírito de apple.com/airpods-pro, landonorris.com e activetheory.net.
+
+- Paleta: porcelana e grafite. `#ecebe8` (papel), `#e3e1dd`, `#d6d4cf` (estúdio), `#0e0e0f` (tinta), cinzas quentes para texto secundário. Sem dourado, sem azul clínico.
+- Tipografia: Switzer (Fontshare, variável, auto-hospedada em `public/fonts`), títulos 500 com tracking bem apertado. Sem serifas decorativas, sem itálicos dourados, sem rótulos com tracinho, sem brilhinhos.
+- Logo: monograma BM real da clínica em versão monocromática (`public/assets/mark-light.webp` / `mark-dark.webp`).
+- Imagens: abertura e sequência com vídeo de banco (Pexels 5496767, licença gratuita, marcado como ilustrativo). Casos clínicos SOMENTE com as fotos/vídeos reais da clínica.
+- Movimento: um relógio só (ticker do GSAP move Lenis, WebGL, sequência e 3D). Revelações por máscara de linha, nada de efeitos empilhados.
 
 ## Hero 3D (a estrela do vídeo)
 
@@ -82,4 +85,4 @@ Lazy-load do canvas, DPR máximo 1.5 no mobile, fallback estático se o WebGL fa
 - `npm run build` passa sem erros
 - Em 390x844 o hero 3D aparece em < 2s, gira sozinho e o simulador troca cor e formato
 - Todos os links de WhatsApp abrem com o número 5511973524548
-- Deploy na Vercel com o nome `bm-odonto` (`npx vercel --prod`)
+- Deploy no Railway a partir da `main` (`railway.json`); também funciona na Vercel
