@@ -1,0 +1,42 @@
+{
+  "name": "bm-odonto",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Landing page (rascunho) da BM Odontologia — lentes em resina em São Paulo",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "start": "serve dist --single --no-clipboard --listen tcp://0.0.0.0:${PORT:-3000}",
+    "typecheck": "tsc -b",
+    "assets:extrair": "node scripts/extrair-assets.mjs",
+    "assets:otimizar": "node scripts/otimizar-assets.mjs",
+    "assets:poster": "node scripts/gerar-poster.mjs"
+  },
+  "dependencies": {
+    "@react-three/drei": "10.7.9",
+    "@react-three/fiber": "9.8.2",
+    "gsap": "3.15.1",
+    "lenis": "1.3.28",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "serve": "14.2.8",
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.5",
+    "@types/node": "22.19.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/three": "0.187.0",
+    "@vitejs/plugin-react": "6.3.0",
+    "sharp": "0.35.5",
+    "tailwindcss": "4.3.5",
+    "typescript": "5.9.3",
+    "vite": "8.3.8"
+  }
+}
