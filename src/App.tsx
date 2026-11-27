@@ -2,8 +2,7 @@ import { useEffect, useLayoutEffect } from "react";
 import { Loader } from "./components/Loader";
 import { Header } from "./components/Header";
 import { Cursor } from "./components/Cursor";
-import { Hero } from "./components/Hero";
-import { SmileSequence } from "./components/SmileSequence";
+import { HeroMacro } from "./components/HeroMacro";
 import { Lentes } from "./components/Lentes";
 import { Resultados } from "./components/Resultados";
 import { Doutores } from "./components/Doutores";
@@ -59,8 +58,7 @@ export default function App() {
       <Cursor />
       <Header />
       <main id="conteudo">
-        <Hero />
-        <SmileSequence />
+        <HeroMacro />
         <Lentes />
         <Resultados />
         <Doutores />
