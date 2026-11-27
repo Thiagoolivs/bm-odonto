@@ -331,3 +331,82 @@ export function createVeneerGuideGeometry() {
   g.computeBoundingSphere();
   return g;
 }
+
+/** ponto da superfície da coroa em (c, u) — mesma fórmula dos anéis */
+function crownPoint(c: number, u: number, sp: ShapeParams, out: Float32Array, o: number) {
+  const sec = crownSection(c, sp);
+  const e = 2 / sec.q;
+  const ex = spow(Math.cos(u), e);
+  const ez = spow(Math.sin(u), e);
+  let z = ez >= 0 ? sec.dl * ez : sec.dg * ez;
+  if (ez < 0) z += sec.conc * Math.pow(1 - ex * ex, 2);
+  if (ez > 0 && sec.lobes > 0) z -= 0.0075 * sec.lobes * smooth(0.55, 0.95, ez) * (0.5 - 0.5 * Math.cos(3 * Math.PI * ex));
+  out[o] = sec.hw * ex;
+  out[o + 1] = sec.y;
+  out[o + 2] = z;
+}
+
+/**
+ * Lente para close macro: casca da face vestibular com margem cervical em arco
+ * (como uma lente real), UV para texturas e espessura relativa para a translucidez.
+ */
+export function createMacroVeneerGeometry(shape: ShapeKey = "oval") {
+  const sp = SHAPE_PARAMS[shape];
+  const pos = new Float32Array(VR * VC * 2 * 3);
+  const uv = new Float32Array(VR * VC * 2 * 2);
+  const thick = new Float32Array(VR * VC * 2);
+  const wrap = 0.24;
+  const a = new Float32Array(3);
+  const b = new Float32Array(3);
+  const pc = new Float32Array(3);
+  const pu = new Float32Array(3);
+  const P = new Float32Array(3);
+  for (let k = 0; k < VR; k++) {
+    const sr = k / (VR - 1);
+    for (let j = 0; j < VC; j++) {
+      const sc = j / (VC - 1);
+      const u = -wrap + sc * (Math.PI + 2 * wrap);
+      const cTop = 0.7 + 0.21 * (1 - Math.pow(2 * sc - 1, 2));
+      const c = 0.006 + (cTop - 0.006) * Math.pow(sr, 1.35);
+      crownPoint(c, u, sp, P, 0);
+      const dc = 0.002;
+      const du = 0.002;
+      crownPoint(c + dc, u, sp, a, 0);
+      crownPoint(Math.max(0.0005, c - dc), u, sp, b, 0);
+      for (let i = 0; i < 3; i++) pc[i] = a[i] - b[i];
+      crownPoint(c, u + du, sp, a, 0);
+      crownPoint(c, u - du, sp, b, 0);
+      for (let i = 0; i < 3; i++) pu[i] = a[i] - b[i];
+      let nx = pc[1] * pu[2] - pc[2] * pu[1];
+      let ny = pc[2] * pu[0] - pc[0] * pu[2];
+      let nz = pc[0] * pu[1] - pc[1] * pu[0];
+      const len = Math.hypot(nx, ny, nz) || 1;
+      nx /= len;
+      ny /= len;
+      nz /= len;
+      const fr = smooth(0, 0.05, sr) * (1 - smooth(0.8, 1, sr));
+      const fc = smooth(0, 0.14, sc) * (1 - smooth(0.86, 1, sc));
+      const rel = Math.max(0.1, fr * fc) * (0.85 + 0.15 * (1 - sr));
+      const t = LENS_T * rel;
+      for (let side = 0; side < 2; side++) {
+        const v = side * VR * VC + k * VC + j;
+        const off = side === 0 ? LENS_GAP + t : LENS_GAP;
+        pos[v * 3] = P[0] + nx * off;
+        pos[v * 3 + 1] = P[1] + ny * off;
+        pos[v * 3 + 2] = P[2] + nz * off;
+        uv[v * 2] = sc;
+        uv[v * 2 + 1] = sr;
+        thick[v] = rel;
+      }
+    }
+  }
+  const nrm = normalsFor(pos, V_INDEX);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  g.setAttribute("normal", new THREE.BufferAttribute(nrm, 3));
+  g.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+  g.setAttribute("aThick", new THREE.BufferAttribute(thick, 1));
+  g.setIndex(V_INDEX);
+  g.computeBoundingSphere();
+  return g;
+}
