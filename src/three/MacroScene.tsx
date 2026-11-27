@@ -161,7 +161,7 @@ function Veneer({ onReady }: { onReady: () => void }) {
     // composição
     const wide = film.wide;
     const baseX = 0.56 * wide;
-    const baseY = 0.3 * (1 - wide);
+    const baseY = 0.4 * (1 - wide);
     const idle = reduced ? 0 : t;
     root.current.position.set(baseX + m.px * 0.04, baseY + 0.02 * Math.sin(idle * 0.6) - m.py * 0.03, 0);
     root.current.rotation.set(
@@ -169,7 +169,9 @@ function Veneer({ onReady }: { onReady: () => void }) {
       -0.92 + 0.16 * Math.sin(idle * 0.23) + m.px * 0.14 + p * 0.9 + (1 - easeOut(intro)) * -0.45,
       0.24 + 0.03 * Math.sin(idle * 0.31),
     );
-    const s = (wide ? 0.86 : 0.74) * (0.9 + 0.1 * easeOut(intro)) * (1 + p * 0.35);
+    const s = (wide ? 0.86 : 0.52) * (0.9 + 0.1 * easeOut(intro)) * (1 + p * 0.35);
+    // no celular (sem multisample) o relevo fino serrilha: suaviza
+    material.normalScale.setScalar(wide ? 0.18 : 0.07);
     root.current.scale.setScalar(s);
 
     // luz-chave quente varre da esquerda para a direita na entrada, depois respira
@@ -219,7 +221,7 @@ function Lens() {
     const t = sceneTime(state.clock.elapsedTime);
     const intro = film.introAt < 0 ? 0 : film.reduced ? 1 : clamp01((t - film.introAt) / 2.6);
     d.bokehScale = 0.45 + 7 * (1 - easeOut(intro));
-    d.target = new THREE.Vector3(0.56 * film.wide, 0.3 * (1 - film.wide), 0.05);
+    d.target = new THREE.Vector3(0.56 * film.wide, 0.4 * (1 - film.wide), 0.05);
   });
   return <DepthOfField ref={dof} focalLength={0.028} bokehScale={8} height={480} />;
 }
